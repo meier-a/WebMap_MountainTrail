@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset=utf-8 />
+	<title>My first Webmap</title>
+	<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+	<link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Lora" rel="stylesheet">
+
+
+
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			background: "whitesmoke";
+			font-family: "Noto Sans", sans-serif;
+			color: #3d3d3d;
+		}
+
+		h1 {
+			position: absolute;
+			margin-top: 0;
+			top: 10px;
+			left: 45px;
+			font-size: 2em;
+			font-family: "Lora", serif;
+			letter-spacing: .04em;
+			padding: 10px 15px;
+			background: rgba(256, 256, 256);
+			border: 1px solid grey;
+			border-radius: 3px;
+			z-index: 800;
+		}
+
+		h2 {
+			font-family: "Lora", serif;
+			letter-spacing: .04em;
+		}
+
+		#map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
+
+		section {
+			position: absolute;
+			/*bottom: 0;*/
+			top: 130px; 
+			left: 10px;
+			width: 280px;
+			margin: 20px auto;
+			padding: 0 15px;
+			background: rgba(256, 256, 256);
+			border: 1px solid grey;
+			border-radius: 3px;
+			z-index: 800;
+		}
+
+		p {
+			font-size: .9em;
+			line-height: 1.5em;
+		}
+
+		a {
+			color: #005daa;
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+
+		/*here i define how the "back to center" controle element should look like*/
+		.home-button {
+        background: white;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        text-decoration: none;
+        cursor: pointer;
+    	}
+    .home-button:hover {
+        background: #f4f4f4;
+    	}
+	</style>
+</head>
+
+<body>
+
+	<h1>Mountaineering Tour: SPAGHETTI TOUR SHORT</h1>
+
+	<div id='map'></div>
+
+	<section>
+		<h2>About this Map</h2>
+
+		<p>Last summer (2023), I embarked on a mountain climb in the Alps known as the Spaghetti Tour, although I only completed part of the entire route. This tour includes several peaks over 4,000 meters and offers breathtaking views of the Alps. While it wasn't my most challenging tour, it was one of the longest, making it ideal for showcasing in my first web map.
+		</p>
+		<p>In the map, I've drawn the route as a line and marked the peaks and huts along the way. The track shown reflects the general route we followed, although it may not be accurate in every detail.
+		</p>
+		<p>See <a href="https://www.sac-cas.ch/en/huts-and-tours/sac-route-portal/liskamm-westgipfel-1055/alpinism/">Portal of the Swiss Alpine Clup</a> for further informations.</p>
+		<!--- <p>Text provided by <a href="https://www.nps.gov/blri/planyourvisit/tanawha-trail.htm">Bob Ross quotes</a></p> -->
+		<p>Map authored by me, Anna Meier</p>
+
+	</section>
+
+	<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+
+	<script src="data/route.js"></script> <!--my route is loaded here-->
+
+	<script>
+
+//options to be used when creating the map
+	var options = {
+		center: [45.95, 7.78],
+		zoom: 12.48,
+		maxZoom: 14
+	}
+
+		console.log(data); //output will be my route (GeoJSON object)
+
+//creation of the Leaflet map
+		var map = L.map('map', options);
+
+
+// Add user-defined control element - a friend and google helped me to do this...
+	L.Control.HomeButton = L.Control.extend({
+ 	   onAdd: function(map) {
+    	    var controlDiv = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+        	var controlUI = L.DomUtil.create('a', 'home-button', controlDiv);
+     	   controlUI.title = 'Zurück zur Anfangsansicht';
+        	controlUI.innerHTML = '⦿';
+      	  L.DomEvent.on(controlUI, 'click', function() {
+      	      map.setView(options.center, options.zoom);
+      	  });
+     	   return controlDiv;
+    }
+	});
+
+	L.control.homeButton = function(opts) {
+  	  return new L.Control.HomeButton(opts);
+	}
+
+	L.control.homeButton({ position: 'topleft' }).addTo(map);
+
+//Limitation of the visible map area
+	var southWest = L.latLng(45.44, 5.18);
+	var northEast = L.latLng(48.34, 11.41);
+	var bounds = L.latLngBounds(southWest, northEast);
+	map.setMaxBounds(bounds);
+
+//request to load basemap
+	var SwissFederalGeoportal_NationalMapGrey = L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
+		attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
+		minZoom: 2,
+		maxZoom: 13,
+		bounds: [[45.398181, 5.140242], [48.230651, 11.47757]]
+	}).addTo(map);
+
+
+
+//var myRoute = L.geoJson(data).addTo(map);
+//map.fitBounds(myRoute.getBounds());
+
+	var myRoute = L.geoJson(data, {
+		filter : function(feature) {
+			if(feature.geometry.type =="LineString") {
+				return feature;
+			}
+		},
+		style : function(feature) {
+			return {
+				color: "#005DAA",
+				weight: 5,
+				opacity: 0.6,
+				dashArray: "4, 4"
+			}
+		}
+	}).addTo(map);
+
+	var myStops = L.geoJson(data, {
+		filter : function(feature) {
+			if(feature.geometry.type == "Point") {
+				return feature;
+			}
+		},
+		onEachFeature : function(feature, layer) {
+		//console.log(feature.properties)
+			layer.bindTooltip(feature.properties['name']);
+
+		}
+	}).addTo(map);
+
+
+
+
+//map.fitBounds(myRoute.getBounds()); //should set the boundaries and zoom level according to the route - but chooses one zoomlevel to high - so it was set manually
+
+
+
+	</script>
+
+</body>
+
+</html>
