@@ -125,8 +125,7 @@
 //options to be used when creating the map
 	var options = {
 		center: [45.95, 7.78],
-		zoom: 12.48,
-		maxZoom: 14
+		zoom: 12.48
 	}
 
 		console.log(data); //output will be my route (GeoJSON object)
@@ -156,7 +155,7 @@
 	L.control.homeButton({ position: 'topleft' }).addTo(map);
 
 //Limitation of the visible map area
-	var southWest = L.latLng(45.44, 5.18);
+	var southWest = L.latLng(45.44, 4.5);
 	var northEast = L.latLng(48.34, 11.41);
 	var bounds = L.latLngBounds(southWest, northEast);
 	map.setMaxBounds(bounds);
@@ -164,7 +163,7 @@
 //request to load basemap
 	var SwissFederalGeoportal_NationalMapGrey = L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
 		attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
-		minZoom: 2,
+		minZoom: 7.5, //changed from original (min zoom: 2)
 		maxZoom: 13,
 		bounds: [[45.398181, 5.140242], [48.230651, 11.47757]]
 	}).addTo(map);
